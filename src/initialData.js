@@ -1,39 +1,45 @@
-import React from 'react'
+//import React from 'react'
 
 
 
 export const initialData = {
     elements : {
-    'element-1' : {id : 'element-1', content : <div>'Some Text1'</div> },
-    'element-2' : {id : 'element-2', content : 'Some Text2' },
-    'element-3' : {id : 'element-3', content : 'Some Text3' },
-    'element-4' : {id : 'element-4', content : 'Some Text4' },
-    'element-5' : {id : 'element-5', content : 'Some Text5' },
-    'element-6' : {id : 'element-6', content : 'Some Text6' },
-    'element-7' : {id : 'element-7', content : 'Some Text7' },
-    'element-8' : {id : 'element-8', content : 'Some Text8' },
+    'placeholder': {id : 'placeholder' , content : 'Dodaj placeholder'},
+    'tekst': {id : 'tekst' , content : 'Dodaj Tekst'},
+    'slika': {id : 'slika' , content : 'Dodaj Sliku'},
+   
+    '1' : {id : '1', content : 'Insert Here'},
+    '2' : {id : '2', content : 'Some Text2' },
+    '3' : {id : '3', content : 'Some Text3' },
+    '4' : {id : '4', content : 'Some Text4' },
+    '5' : {id : '5', content : 'Some Text5' },
+    '6' : {id : '6', content : 'Some Text6' },
+    '7' : {id : '7', content : 'Some Text7' },
+    '8' : {id : '8', content : 'Some Text8' },
+    '9' : {id : '9', content : 'Some Text9' },
+    '10' : {id : '10', content : 'Some Text10' },
+    '11' : {id : '11', content : 'Some Text11' },
+    
   
 },
     columns : {
-        /*
-        'column-1' :{
-            id : 'column-1',
-            title : 'NETGEN',
-            elementIds : ['element-1'],
+     
+        '0': {
+            id : '0',
+            elementIds: ['placeholder','tekst','slika']
         },
-        'column-2' :{
-            id : 'column-2',
+        
+        '1' :{
+            id : '1',
             title : 'NETGEN',
-            elementIds : [ 'element-2', 'element-3', 'element-4'],
+            elementIds : [],
         },
-        */
-        'column-3' :{
-            id : 'column-3',
-            title : 'NETGEN',
-            elementIds : ['element-5', 'element-6', 'element-7', 'element-8'],
-        }
+    
+
+     
+        
     },
-    columnOrder : [ 'column-3'],
+    columnOrder : ['0','1'],
 
 }
 
