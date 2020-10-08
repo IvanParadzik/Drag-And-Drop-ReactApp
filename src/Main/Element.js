@@ -47,7 +47,7 @@ export default class Element extends React.Component{
     render(){
             const isDragDisabled = this.props.row.id !== '0'
 
-            if(this.props.row.id === '1'){
+            if(this.props.row.id === '0'){
                 return(
                 
                     <Draggable draggableId = {this.props.element.id} index = {this.props.index} isDragDisabled = {isDragDisabled}>
