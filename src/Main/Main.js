@@ -1,14 +1,7 @@
 
-
-
 import React from 'react';
 
-
-
-
 import data from './data'
-
-
 
 import Row from './Rows'
 
@@ -17,13 +10,17 @@ import {DragDropContext} from 'react-beautiful-dnd'
 
 
 export default class App extends React.Component{
+
+ //postavljanje stanja 
   state = data;
  
+
+
+  // funkcija kojom se uploada slika u placeholder pritiskom tipke 'upload image'
   handleImage =(e, elementId, dropID)=>{
       e.preventDefault()
       const dictElement = {
         id: elementId,
-
         content: (
           <>
             <div>
@@ -39,7 +36,8 @@ export default class App extends React.Component{
                   position: "relative",
                   width: "8%",
                   left: "90%",
-                  fontSize: "8px"
+                  fontSize: "8px",
+                  borderRadius : '25px'
                 }}
               >
                 X
@@ -53,11 +51,8 @@ export default class App extends React.Component{
         ),
       };
       data['elements'][elementId] = dictElement
-      
-
       this.setState({
           ...this.state,
-         
           elements : {
               ...this.state.elements,
               [elementId] : data['elements'][elementId]
@@ -66,7 +61,7 @@ export default class App extends React.Component{
 
   }
   
-
+  // funkcija kojom se pritiskom na tipku 'x' briše element iz placeholdera
   removeElement = (e, elementId,dropId) =>{
       e.preventDefault()
       delete data["elements"][elementId]
@@ -77,7 +72,7 @@ export default class App extends React.Component{
           columns : data["columns"]
       })
   }
-
+ // funkcija kojom se sprema trenutno stanje inputa(http) za upload slike 
   handle_image_http = (e, elementId, dropID)=>{
     const value = e.target.value;
     
@@ -105,7 +100,8 @@ export default class App extends React.Component{
                   position: "relative",
                   width: "8%",
                   left: "90%",
-                  fontSize: "8px"
+                  fontSize: "8px",
+                  borderRadius : '25px'
                 }}
               >
                 X
@@ -120,9 +116,9 @@ export default class App extends React.Component{
                 width: "70%",
                 left: "15%",
               }}>
-            <label  > Paste Image http here</label>
                    <input
                   type="http"
+                  placeholder = 'Paste Image http here'
                   defaultValue = {this.state.imageHttp[elementId].http}
                   onChange={(e) =>{this.handle_image_http(e,elementId, dropID)}}
                   required={true}
@@ -134,7 +130,9 @@ export default class App extends React.Component{
                 position: "relative",
                 width: "70%",
                 left: "15%",
-                marginTop: "1px"
+                marginTop: "20px",
+                borderRadius : '25px'
+                
               }}
               
             >
@@ -146,7 +144,6 @@ export default class App extends React.Component{
       };
       data['elements'][elementId] = dictElement
       
-
       this.setState({
           ...this.state,
          
@@ -155,13 +152,9 @@ export default class App extends React.Component{
               [elementId] : data['elements'][elementId]
           },
       })
-
-
-
-
   }
-
-  handleChange = (e,elementId, dropID) =>{
+  //funkcija kojom se sprema(prati) trenutno stanje teksta unutar textarea 
+  handleChangeTextarea = (e,elementId, dropID) =>{
     
     const value = e.target.value;
    
@@ -171,8 +164,6 @@ export default class App extends React.Component{
         ...this.state,
         textarea  :  data['textarea']
     })
-
-    
     let dictElement = {
         id: elementId,
         content: (
@@ -191,7 +182,8 @@ export default class App extends React.Component{
                   position: "relative",
                   width: "8%",
                   left: "90%",
-                  fontSize: "8px"
+                  fontSize: "8px",
+                  borderRadius : '25px'
                 }}
               >
                 X
@@ -200,9 +192,10 @@ export default class App extends React.Component{
             <textarea
               type="text"
               name= ""
+              placeholder = 'Insert text here'
               defaultValue={this.state.textarea[elementId].text}
               onChange={(e) =>{
-                this.handleChange(e, elementId, dropID)}
+                this.handleChangeTextarea(e, elementId, dropID)}
               }
               style={{
                 height: "80%",
@@ -229,20 +222,188 @@ export default class App extends React.Component{
 
   }
 
-
-
-
-
-  
+  // Kada završi drag aktivira se funkcija 
   onDragEnd = result=>{
+     //dobivaju se rezultati koji nam govore gdje je drag završio te gdje je počeo
     const {destination, source,draggableId, type} =result;
 
+    //ako nema nove pozicije ne dogodi se ništa 
     if(!destination){
         return;}
+    //ako je nova pozicija ista kao na početku ne dogodi se ništa 
       if(
         destination.droppableId === source.droppableId &&
         destination.index === source.index
       ){return ; }
+
+      //ako dragamo placeholder s navbara u smeće ne dogodi se ništa 
+      if(destination.droppableId === '1'){
+        if(source.droppableId === '0'){
+            return;
+        }
+    }
+    
+    // ako je završna pozicija placeholdera '1' (što predstavlja red u kojem se nalazi trash) dogodi se brisanje placeholdera 
+    if(destination.droppableId === '1'){
+    
+        if(Object.keys(data['columns'][draggableId]['elementIds']).length ===1){
+            // Kada bi bilo backenda u ovom dijelu bi se brisao element unutar placeholdera 
+        }
+        delete data['columns'][draggableId]
+        let columnIds = Object.values(data['rows'][source.droppableId]["columnIds"])
+
+        columnIds.splice(source.index,1)
+       
+        data['rows'][source.droppableId]["columnIds"] = columnIds
+        this.setState({
+            ...this.state,
+            rows : data["rows"],
+            columns : data["columns"]
+        })
+
+        const start = data['rows'][source.droppableId]
+        const ColumnIds = Array.from(start.columnIds);
+
+        const endRowCheck = this.state.rows[(Object.keys(this.state.rows).length-1).toString()]
+        const endRowIdsCheck  = Array.from(endRowCheck.columnIds)
+        const predzadnjiRowCheck = this.state.rows[(Object.keys(this.state.rows).length-2).toString()]
+        const predzadnjiRowIdsCheck = Array.from(predzadnjiRowCheck.columnIds)
+
+        function SizeString(state) {
+            if (endRowIdsCheck.length === 0) {
+              return (Object.keys(state).length - 2).toString();
+            } else {
+              return (Object.keys(state).length - 1).toString();
+            }
+          }
+
+        if (
+          (ColumnIds.length < 3 &&
+            source.droppableId !==
+              SizeString(this.state.rows)) ||
+          (source.droppableId === "2" && ColumnIds.length === 0)
+        ) {
+     
+          function Size(state) {
+            if (endRowIdsCheck.length === 0) {
+              return Object.keys(state).length - 2;
+            } else {
+              return Object.keys(state).length - 1;
+            }
+          }
+          var sizeOfRows = Size(this.state.rows);
+
+          for (let i = parseInt(source.droppableId); i < sizeOfRows; i++) {
+     
+            let row = data["rows"][i + 1];
+            let rowCols = Array.from(row.columnIds);
+
+            let lastColId = rowCols.slice(0)[0];
+        
+            let nextRow = data["rows"][i];
+            let nextRowIds = Array.from(nextRow.columnIds);
+        
+            if (i !== parseInt(source.droppableId)) {
+         
+              nextRowIds.splice(0, 1);
+              
+            }
+            nextRowIds.splice(2, 0, lastColId);
+            rowCols.splice(0, 1);
+            
+            if(sizeOfRows  <4 && source.droppableId !== (Object.keys(this.state.rows).length-1).toString() ){
+              
+                data["rows"][i + 1]["columnIds"] = rowCols;
+            }  
+            data["rows"][i]["columnIds"] = nextRowIds;
+           
+          }
+          this.setState({
+            ...this.state,
+            rows : data["rows"],
+        })
+        }
+        
+        else{
+            let endRow = this.state.rows[(Object.keys(this.state.rows).length-1).toString()]
+            let predzadnjiRow = this.state.rows[(Object.keys(this.state.rows).length-2).toString()]
+            let predzadnjiRowIds = Array.from(predzadnjiRow.columnIds)
+           
+            let endRowIds  = Array.from(endRow.columnIds)
+            let newRowSize = Object.keys(this.state.rows).length - 1
+            if((predzadnjiRowIds.length<3 && endRowIds.length ===0)  || (source.droppableId ==='2' && newRowSize > 3 )){
+                delete data['rowOrder'][(Object.keys(this.state.rows).length-1).toString()]
+                delete data['rows'][(Object.keys(this.state.rows).length-1).toString()]   
+            }
+            var filteredOrderAgain= Object.values(data['rowOrder']).filter(function (el) {
+                return el != null;
+                });
+            this.setState({
+                ...this.state,
+                rows : data["rows"],
+                rowOrder: filteredOrderAgain
+            
+            })
+            
+           return;
+        }
+
+        if(source.droppableId === (Object.keys(this.state.rows).length-1).toString() && endRowIdsCheck.length ===0 ){
+            console.log('here')
+            return
+        }
+        if(source.droppableId ==='2' &&  endRowIdsCheck.length ===2 && (Object.keys(this.state.rows).length-1).toString() ==='3'){
+            return
+        }
+        let newRowSizeCheck = Object.keys(this.state.rows).length - 2
+        if(endRowIdsCheck.length !==0  ){
+            let endRow = data["rows"][(Object.keys(this.state.rows).length-1).toString()];
+            let endRowIds = Array.from(endRow.columnIds)
+            endRowIds.splice(0,1)
+            data["rows"][[(Object.keys(this.state.rows).length).toString()-1]]["columnIds"] = endRowIds;
+            this.setState({
+                ...this.state,
+                rows : data["rows"],  
+            })
+        }
+
+        else if(endRowIdsCheck.length ===0 && predzadnjiRowIdsCheck.length === 3 && newRowSizeCheck > 3  ){
+            let endRow = data["rows"][(Object.keys(this.state.rows).length-2).toString()];
+            let endRowIds = Array.from(endRow.columnIds)
+            endRowIds.splice(0,1)
+            data["rows"][[(Object.keys(this.state.rows).length).toString()-2]]["columnIds"] = endRowIds;
+            this.setState({
+                ...this.state,
+                rows : data["rows"],  
+            })
+
+        }
+
+          //brisanje viška redova zbog brisanja placeholdera
+          let endRow = this.state.rows[(Object.keys(this.state.rows).length-1).toString()]
+          let predzadnjiRow = this.state.rows[(Object.keys(this.state.rows).length-2).toString()]
+          let predzadnjiRowIds = Array.from(predzadnjiRow.columnIds)
+          let endRowIds  = Array.from(endRow.columnIds)
+          let newRowSize = Object.keys(this.state.rows).length - 1
+          if((predzadnjiRowIds.length<3 && endRowIds.length ===0)  && (newRowSize > 3 )){
+             
+              delete data['rowOrder'][(Object.keys(this.state.rows).length-1).toString()]
+              delete data['rows'][(Object.keys(this.state.rows).length-1).toString()]
+              
+          }
+  
+          var filteredOrder = Object.values(data['rowOrder']).filter(function (el) {
+              return el != null;
+            });
+           
+        this.setState({
+            ...this.state,
+            rows : data["rows"],
+            rowOrder: filteredOrder
+         
+        })
+        return
+    }
 
 
     //draging placeholders
@@ -266,11 +427,20 @@ export default class App extends React.Component{
             const finish = data['rows'][destination.droppableId]
             const ColumnIds = Array.from(finish.columnIds);
      
-            if(ColumnIds.length>3 || (destination.droppableId ==='1' && ColumnIds.length>1) ){
+            if(ColumnIds.length>3 || (destination.droppableId ==='2' && ColumnIds.length>1) ){
+
+                function getRowSize(id, state) {
+                    if (id === '3') {
+                      return Object.keys(state).length -1;
+                    } else {
+                      return Object.keys(state).length -1;
+                    }
+                  }
               
-              var RowSize = Object.keys(this.state.rows).length -1;
+              var RowSize = getRowSize(destination.droppableId, this.state.rows)
 
               for(let i =RowSize ; i >  parseInt(destination.droppableId) ; i--){
+               
                 let row =  data['rows'][i-1]
                 let rowCols = Array.from(row.columnIds)
              
@@ -296,20 +466,23 @@ export default class App extends React.Component{
             }
             //check if last row is more then 3 to create new row
               
-            let rowLenght = Object.keys(this.state.rows).length-1
-            const  lastRow = data['rows'][rowLenght]
-            console.log(lastRow)
+            let rowLenght = Object.keys(this.state.rows).length-2
+            const  lastRow = this.state.rows[rowLenght+1]
+            
             const lastRowColumnIds = Array.from(lastRow.columnIds)
-            const position = (rowLenght+1).toString()
+            const position = (rowLenght+2).toString()
             let NewRow = { id : position, columnIds : []}
-            if(lastRowColumnIds.length === 3 || (destination.droppableId ===`1` && rowLenght ===1)){
+            if(lastRowColumnIds.length === 3 ){
               data['rows'][position] = NewRow
-              data['rowOrder'].splice(parseInt(position)+1,0,position)
+              data['rowOrder'].splice(parseInt(position),0,position)
             }
+            var filteredOrderCreate = Object.values(data['rowOrder']).filter(function (el) {
+                return el != null;
+              });
             this.setState({
                 ...this.state, 
                 rows : data['rows'],
-                rowOrder : data["rowOrder"],
+                rowOrder : filteredOrderCreate,
                 columns : data['columns'] 
             }) 
            
@@ -321,7 +494,7 @@ export default class App extends React.Component{
     
     const start = this.state.rows[source.droppableId];
     const finish = this.state.rows[destination.droppableId];
-    //Draggin in rows
+    //Dragging in rows
     if(start === finish){
       const newColumnIds = Array.from(start.columnIds);
         newColumnIds.splice(source.index,1)
@@ -364,9 +537,12 @@ export default class App extends React.Component{
       }
     }
 
-    var size = Object.keys(this.state.rows).length -2  ;
-
+    var size = Object.keys(this.state.rows).length -1  ;
+    // ako draggamo placeholder iz gornjih redova u doljnji
     if((newFinish.columnIds.length >3 || size.toString() === newFinish.id.toString() )&& newStart.id < newFinish.id ){
+        if(destination.index ===0){
+        return;
+    }
      
       const NewRows = []
      
@@ -390,9 +566,7 @@ export default class App extends React.Component{
             nextRowColumnIds.splice(source.index,1);
             nextRowColumnIds.splice(2,0, firstCol)
            }
-           if(destination.index ===0){
-               return;
-           }
+         
            
           
      
@@ -428,17 +602,18 @@ export default class App extends React.Component{
         }
     
   
-        this.setState(newState) 
+        this.setState(newState)
+        data['rows'] = rows
 
      
     return;
       }
   
 
-   
-    else if ((newFinish.columnIds.length >3  || newFinish.id ===`1`)  && newStart.id > newFinish.id){
+       // ako draggamo placeholder iz doljnjih redova u gornji
+    else if ((newFinish.columnIds.length >3  || newFinish.id ===`2`)  && newStart.id > newFinish.id){
       const NewRows = []
-      if(destination.index ===3 || (destination.droppableId ==='1' && destination.index ===1 )){
+      if(destination.index ===3 || (destination.droppableId ==='2' && destination.index ===1 )){
          
         return;
     }
@@ -498,18 +673,14 @@ export default class App extends React.Component{
         ...this.state,
         rows 
       }
+      data['rows'] = rows
 
-      this.setState(newState)
-
-     
-    
+      this.setState(newState) 
     return;
     }
     this.setState(newState)
+   
     }
-
-
-
 
     // creating elements
     else if(type === 'elements'){
@@ -526,9 +697,7 @@ export default class App extends React.Component{
                 ...this.state,
                 textarea : data["textarea"][elementId]
             })
-            const dropID = destination.droppableId
-            
-        
+            const dropID = destination.droppableId 
            
             let dictElement = {
               id: elementId,
@@ -547,7 +716,8 @@ export default class App extends React.Component{
                         position: "relative",
                         width: "8%",
                         left: "90%",
-                        fontSize: "8px"
+                        fontSize: "8px",
+                        borderRadius : '25px'
                       }}
                     >
                       X
@@ -556,9 +726,9 @@ export default class App extends React.Component{
                   <textarea
                     type="text"
                     name= ""
-                    defaultValue={this.state.textarea[elementId].text}
+                    placeholder = 'Insert text here'
                     onChange={(e) =>{
-                      this.handleChange(e, elementId,dropID)}
+                      this.handleChangeTextarea(e, elementId,dropID)}
                     }
                     style={{
                       height: "80%",
@@ -585,9 +755,8 @@ export default class App extends React.Component{
                 },
             })
           
-
-
         }
+        //creating image
         else if (draggableId === 'image'){
             let newid =  parseInt(Object.keys(data['elements'])[Object.keys(data['elements']).length - 3])
             const elementId =(newid+1).toString()
@@ -618,7 +787,8 @@ export default class App extends React.Component{
                         position: "relative",
                         width: "8%",
                         left: "90%",
-                        fontSize: "8px"
+                        fontSize: "8px",
+                        borderRadius : '25px'
                       }}
                     >
                       X
@@ -631,10 +801,11 @@ export default class App extends React.Component{
                       
                       left: "15%",
                     }}>
-                  <label  > Paste Image http here</label>
+                  
                          <input
                         type="http"
-                        defaultValue = {''}
+                        placeholder='Paste Image http here'
+                 
                         onChange={(e) =>{this.handle_image_http(e,elementId, destination.droppableId)}}
                         required={true}
                         className="form-control input-create"
@@ -645,7 +816,9 @@ export default class App extends React.Component{
                       position: "relative",
                       width: "70%",
                       left: "15%",
-                      marginTop: "1px"
+                      marginTop: "20px",
+                      borderRadius : '25px'
+
                     }}
                     
                   >
@@ -677,12 +850,11 @@ export default class App extends React.Component{
   }
 
   render(){
-   console.log(this.state)
+   
     
     return (<DragDropContext
         onDragEnd = {this.onDragEnd}
     >
-
         {this.state.rowOrder.map((rowId)=>{
         const row = this.state.rows[rowId];
         const columns = row.columnIds.map(colId => this.state.columns[colId])
